@@ -25,22 +25,24 @@ io.on('connection', (client) => {
 
         client.broadcast.to(usuario.sala).emit('listaPersona', usuarios.obtenerPersonasPorSala(usuario.sala))
 
-        callback(usuarios.obtenerPersonasPorSala(usuario.sala))
-
         // avisa a los demás usuarios que un nuevo usuario se ha conectado
         client.broadcast.to(usuario.sala).emit('crearMensaje', {
             usuario: 'Administrador',
             mensaje: `${usuario.nombre} se ha unido al chat`
         })
 
+        callback(usuarios.obtenerPersonasPorSala(usuario.sala))
+
     })
 
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.obtenerPersona(client.id)
 
         let mensaje = crearMensaje(persona.nombre, data.mensaje)
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje)
+
+        callback(mensaje)
     })
 
     client.on('disconnect', () => {
